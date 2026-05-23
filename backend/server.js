@@ -8,16 +8,20 @@ import authRoutes from './routes/authRoutes.js'
 import gameRoutes from './routes/gameRoutes.js'
 
 dotenv.config()
-const express = require('express');
-const cors = require('cors');
-const app = express();
 
-// Middleware
+const app = express()
+
 app.use(express.json())
 app.use(cors({
-  origin: 'https://gamevault-fullstack-webproject-1.onrender.com',
-  credentials: true 
-}));
+  origin: (origin, cb) => {
+    const frontend = process.env.FRONTEND_URL
+    const isLocalhost = origin && /^http:\/\/localhost:\d+$/.test(origin)
+    const isFrontend = frontend && origin === frontend
+    if (!origin || isLocalhost || isFrontend) cb(null, true)
+    else cb(new Error(`CORS blocked: ${origin}`))
+  },
+  credentials: true
+}))
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -33,12 +37,10 @@ app.use(postLogger)
 app.use('/api/auth', authRoutes)
 app.use('/api/games', gameRoutes)
 
-// Test route
 app.get('/', (req, res) => {
   res.json({ message: 'GameVault API is running' })
 })
 
-// Connect to MongoDB and start server
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('MongoDB connected')
