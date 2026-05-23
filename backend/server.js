@@ -5,9 +5,10 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import postLogger from './middleware/logger.js'
 import authRoutes from './routes/authRoutes.js'
+import gameRoutes from './routes/gameRoutes.js'
 
 
-
+app.use('/api/games', gameRoutes)
 app.use('/api/auth', authRoutes)
 app.use(postLogger) 
 dotenv.config()
