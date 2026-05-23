@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom' // Added useNavigate
 import styles from './AuthPage.module.css'
+import { useAuth } from '../context/AuthContext'
+
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' })
@@ -8,11 +10,17 @@ export default function LoginPage() {
 
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
   
-  const handleSubmit = e => { 
-    e.preventDefault(); 
-    // Requirement: Non-functional placeholder that redirects to home
-    navigate('/'); 
+  const { login } = useAuth()
+
+const handleSubmit = async e => {
+  e.preventDefault()
+  try {
+    await login(form.email, form.password)
+    navigate('/')
+  } catch (err) {
+    alert(err.response?.data?.message || 'Login failed')
   }
+}
 
   return (
     <div className="page-wrapper">

@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom' // Added useNavigate
 import styles from './AuthPage.module.css'
+import { useAuth } from '../context/AuthContext'
+
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' })
@@ -8,25 +10,19 @@ export default function RegisterPage() {
 
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
 
-  const handleSubmit = e => { 
-    e.preventDefault(); 
+  const { register } = useAuth()
 
-    // 1. Password Length Check (Requirement: min 8 characters)[cite: 1]
-    if (form.password.length < 8) {
-      alert('Password must be at least 8 characters long.');
-      return; 
-    }
-
-    // 2. Password Match Check[cite: 1]
-    if (form.password !== form.confirm) {
-      alert('Passwords do not match.');
-      return; 
-    }
-
-    // 3. Successful Validation Redirect[cite: 1]
-    // Since this is a demo, we redirect to the home page upon success[cite: 1]
-    navigate('/'); 
+const handleSubmit = async e => {
+  e.preventDefault()
+  if (form.password.length < 8) return alert('Password must be at least 8 characters.')
+  if (form.password !== form.confirm) return alert('Passwords do not match.')
+  try {
+    await register(form.name, form.email, form.password)
+    navigate('/')
+  } catch (err) {
+    alert(err.response?.data?.message || 'Registration failed')
   }
+}
 
   return (
     <div className="page-wrapper">

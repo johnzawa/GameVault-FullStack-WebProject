@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react'
-import games from '../data/games'
 import GameCard from '../components/GameCard'
 import styles from './MainPage.module.css'
+import { useState, useEffect, useMemo } from 'react'
+import api from '../api'
 
 const GENRES = ['All', ...Array.from(new Set(games.map(g => g.genre))).sort()]
 
@@ -20,6 +21,18 @@ export default function MainPage() {
   const [search, setSearch] = useState('')
   const [genre, setGenre] = useState('All')
   const [sort, setSort] = useState('rating-desc')
+
+  // Fetch games from the backend instead of using mock data
+  useEffect(() => {
+    api.get('/games')
+      .then(res => setAllGames(res.data))
+      .catch(err => console.error('Failed to fetch games:', err))
+  }, [])
+
+  // GENRES computed from live data (was previously hardcoded from mock data)
+  const GENRES = useMemo(() => {
+    return ['All', ...Array.from(new Set(allGames.map(g => g.genre))).sort()]
+  }, [allGames])
 
   const processed = useMemo(() => {
     // 1. Filter by search query AND genre simultaneously

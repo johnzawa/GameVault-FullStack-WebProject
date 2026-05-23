@@ -1,15 +1,23 @@
 import { NavLink } from 'react-router-dom'
 import { useState } from 'react'
 import styles from './Header.module.css'
+import { useAuth } from '../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    await logout()
+    navigate('/')
+  }
 
   const links = [
     { to: '/', label: 'Catalog' },
     { to: '/about', label: 'About' },
-    { to: '/login', label: 'Login' },
-    { to: '/register', label: 'Register' },
+    ...(!user ? [{ to: '/login', label: 'Login' }, { to: '/register', label: 'Register' }] : [])
   ]
 
   return (
@@ -35,7 +43,11 @@ export default function Header() {
             </NavLink>
           ))}
         </nav>
-
+        {user && (
+          <button onClick={handleLogout} className={styles.navLink}>
+            Logout ({user.name})
+          </button>
+        )}
         <button
           className={styles.menuToggle}
           onClick={() => setMenuOpen(o => !o)}
