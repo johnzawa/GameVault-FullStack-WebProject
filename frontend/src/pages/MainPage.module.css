@@ -183,6 +183,25 @@
   border-color: rgba(245, 166, 35, 0.4);
 }
 
+.addBtn {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  border: none;
+  background: var(--accent);
+  color: #080a0f;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.addBtn:hover {
+  background: #f5b84a;
+}
+
 .list {
   display: flex;
   flex-direction: column;

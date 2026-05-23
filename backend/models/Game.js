@@ -11,7 +11,8 @@ const gameSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   metacritic: { type: Number },
   status: { type: String, enum: ['Available', 'Early Access', 'Coming Soon'], default: 'Available' },
-  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+  isDefault: { type: Boolean, default: false },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true })
 
 export default mongoose.model('Game', gameSchema)

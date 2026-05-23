@@ -7,10 +7,6 @@ import postLogger from './middleware/logger.js'
 import authRoutes from './routes/authRoutes.js'
 import gameRoutes from './routes/gameRoutes.js'
 
-
-app.use('/api/games', gameRoutes)
-app.use('/api/auth', authRoutes)
-app.use(postLogger) 
 dotenv.config()
 
 const app = express()
@@ -18,7 +14,7 @@ const app = express()
 // Middleware
 app.use(express.json())
 app.use(cors({
-  origin: 'http://localhost:5173', 
+  origin: /^http:\/\/localhost:\d+$/,
   credentials: true
 }))
 app.use(session({
@@ -27,6 +23,9 @@ app.use(session({
   saveUninitialized: false,
   cookie: { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 } // 1 day
 }))
+app.use(postLogger)
+app.use('/api/auth', authRoutes)
+app.use('/api/games', gameRoutes)
 
 // Test route
 app.get('/', (req, res) => {

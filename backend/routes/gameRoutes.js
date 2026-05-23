@@ -24,6 +24,7 @@ router.post('/', requireAuth, async (req, res) => {
   try {
     const game = new Game({ ...req.body, createdBy: req.session.userId })
     await game.save()
+    await game.populate('createdBy', 'name email')
     res.status(201).json(game)
   } catch (err) {
     res.status(400).json({ message: 'Validation error', error: err.message })
@@ -50,13 +51,12 @@ router.put('/:id', requireAuth, async (req, res) => {
 // DELETE /api/games/:id — delete (only owner — Rubric: Server-Side Authorization)
 router.delete('/:id', requireAuth, async (req, res) => {
   try {
-    // Same pattern: checks ID AND createdBy matches session user
-    const game = await Game.findOneAndDelete({
-      _id: req.params.id,
-      createdBy: req.session.userId
-    })
-    if (!game)
-      return res.status(403).json({ message: 'Not found or not authorized' })
+    const game = await Game.findById(req.params.id)
+    if (!game) return res.status(404).json({ message: 'Game not found' })
+    if (game.isDefault) return res.status(403).json({ message: 'Default games cannot be deleted' })
+    if (String(game.createdBy) !== String(req.session.userId))
+      return res.status(403).json({ message: 'Not authorized' })
+    await game.deleteOne()
     res.json({ message: 'Game deleted' })
   } catch (err) {
     res.status(500).json({ message: 'Server error' })

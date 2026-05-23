@@ -1,10 +1,9 @@
-import { useState, useMemo } from 'react'
-import GameCard from '../components/GameCard'
-import styles from './MainPage.module.css'
 import { useState, useEffect, useMemo } from 'react'
+import GameCard from '../components/GameCard'
+import AddGameModal from '../components/AddGameModal'
+import styles from './MainPage.module.css'
 import api from '../api'
-
-const GENRES = ['All', ...Array.from(new Set(games.map(g => g.genre))).sort()]
+import { useAuth } from '../context/AuthContext'
 
 const SORT_OPTIONS = [
   { value: 'rating-desc', label: 'Rating: High → Low' },
@@ -17,17 +16,21 @@ const SORT_OPTIONS = [
 ]
 
 export default function MainPage() {
-  const [allGames] = useState(games)
+  const { user } = useAuth()
+  const [allGames, setAllGames] = useState([])
   const [search, setSearch] = useState('')
   const [genre, setGenre] = useState('All')
   const [sort, setSort] = useState('rating-desc')
+  const [showModal, setShowModal] = useState(false)
 
-  // Fetch games from the backend instead of using mock data
   useEffect(() => {
     api.get('/games')
       .then(res => setAllGames(res.data))
       .catch(err => console.error('Failed to fetch games:', err))
   }, [])
+
+  const handleAdd = game => setAllGames(prev => [game, ...prev])
+  const handleDelete = id => setAllGames(prev => prev.filter(g => g._id !== id))
 
   // GENRES computed from live data (was previously hardcoded from mock data)
   const GENRES = useMemo(() => {
@@ -118,18 +121,25 @@ export default function MainPage() {
         <span className={styles.resultCount}>
           <span className={styles.countNum}>{processed.length}</span> titles
         </span>
-        {(search || genre !== 'All') && (
-          <button className={styles.resetBtn} onClick={() => { setSearch(''); setGenre('All') }}>
-            Clear filters
-          </button>
-        )}
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          {(search || genre !== 'All') && (
+            <button className={styles.resetBtn} onClick={() => { setSearch(''); setGenre('All') }}>
+              Clear filters
+            </button>
+          )}
+          {user && (
+            <button className={styles.addBtn} onClick={() => setShowModal(true)}>+ Add Game</button>
+          )}
+        </div>
       </div>
+
+      {showModal && <AddGameModal onClose={() => setShowModal(false)} onAdd={handleAdd} />}
 
       {/* Game List */}
       {processed.length > 0 ? (
         <div className={styles.list}>
           {processed.map((game, i) => (
-            <GameCard key={game.id} game={game} index={i} />
+            <GameCard key={game._id} game={game} index={i} user={user} onDelete={handleDelete} />
           ))}
         </div>
       ) : (

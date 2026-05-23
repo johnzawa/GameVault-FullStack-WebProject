@@ -1,4 +1,5 @@
 import styles from './GameCard.module.css'
+import api from '../api'
 
 function RatingBar({ value }) {
   const pct = (value / 10) * 100
@@ -17,7 +18,19 @@ function StatusBadge({ status }) {
   return <span className={`${styles.badge} ${cls}`}>{status}</span>
 }
 
-export default function GameCard({ game, index }) {
+export default function GameCard({ game, index, user, onDelete }) {
+  const isOwner = user && !game.isDefault && game.createdBy?._id === user.id
+
+  const handleDelete = async () => {
+    if (!confirm(`Delete "${game.title}"?`)) return
+    try {
+      await api.delete(`/games/${game._id}`)
+      onDelete(game._id)
+    } catch {
+      alert('Failed to delete game')
+    }
+  }
+
   return (
     <div className={styles.card} style={{ animationDelay: `${index * 40}ms` }}>
       <div className={styles.index}>{String(index + 1).padStart(2, '0')}</div>
@@ -47,6 +60,9 @@ export default function GameCard({ game, index }) {
           <span className={styles.metaScore}>MC {game.metacritic}</span>
         </div>
         <div className={styles.price}>${game.price.toFixed(2)}</div>
+        {isOwner && (
+          <button className={styles.deleteBtn} onClick={handleDelete} title="Delete game">✕</button>
+        )}
       </div>
     </div>
   )
