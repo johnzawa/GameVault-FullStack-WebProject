@@ -3,7 +3,10 @@ import mongoose from 'mongoose'
 import session from 'express-session'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import postLogger from './middleware/logger.js'
 
+
+app.use(postLogger)
 dotenv.config()
 
 const app = express()
