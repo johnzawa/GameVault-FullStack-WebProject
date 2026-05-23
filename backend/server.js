@@ -8,21 +8,16 @@ import authRoutes from './routes/authRoutes.js'
 import gameRoutes from './routes/gameRoutes.js'
 
 dotenv.config()
-
-const app = express()
+const express = require('express');
+const cors = require('cors');
+const app = express();
 
 // Middleware
 app.use(express.json())
 app.use(cors({
-  origin: (origin, cb) => {
-    const frontend = process.env.FRONTEND_URL
-    const isLocalhost = origin && /^http:\/\/localhost:\d+$/.test(origin)
-    const isFrontend = frontend && origin === frontend
-    if (!origin || isLocalhost || isFrontend) cb(null, true)
-    else cb(new Error(`CORS blocked: ${origin} (FRONTEND_URL=${frontend})`))
-  },
-  credentials: true
-}))
+  origin: 'https://gamevault-fullstack-webproject-1.onrender.com',
+  credentials: true 
+}));
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
