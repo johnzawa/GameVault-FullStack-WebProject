@@ -13,17 +13,13 @@ const app = express()
 
 // Middleware
 app.use(express.json())
-const allowedOrigins = [
-  /^http:\/\/localhost:\d+$/,
-  process.env.FRONTEND_URL,
-].filter(Boolean)
-
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin || allowedOrigins.some(o => typeof o === 'string' ? o === origin : o.test(origin)))
-      cb(null, true)
-    else
-      cb(new Error('Not allowed by CORS'))
+    const frontend = process.env.FRONTEND_URL
+    const isLocalhost = origin && /^http:\/\/localhost:\d+$/.test(origin)
+    const isFrontend = frontend && origin === frontend
+    if (!origin || isLocalhost || isFrontend) cb(null, true)
+    else cb(new Error(`CORS blocked: ${origin} (FRONTEND_URL=${frontend})`))
   },
   credentials: true
 }))
