@@ -4,9 +4,12 @@ import session from 'express-session'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import postLogger from './middleware/logger.js'
+import authRoutes from './routes/authRoutes.js'
 
 
-app.use(postLogger)
+
+app.use('/api/auth', authRoutes)
+app.use(postLogger) 
 dotenv.config()
 
 const app = express()
