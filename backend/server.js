@@ -13,15 +13,30 @@ const app = express()
 
 // Middleware
 app.use(express.json())
+const allowedOrigins = [
+  /^http:\/\/localhost:\d+$/,
+  process.env.FRONTEND_URL,
+].filter(Boolean)
+
 app.use(cors({
-  origin: /^http:\/\/localhost:\d+$/,
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.some(o => typeof o === 'string' ? o === origin : o.test(origin)))
+      cb(null, true)
+    else
+      cb(new Error('Not allowed by CORS'))
+  },
   credentials: true
 }))
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 } // 1 day
+  cookie: {
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  }
 }))
 app.use(postLogger)
 app.use('/api/auth', authRoutes)
